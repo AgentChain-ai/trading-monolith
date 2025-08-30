@@ -71,7 +71,13 @@ app = setup_monitoring(app)
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # React dev servers
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:5173",  # React dev servers
+        "https://agentchain.trade",  # Production frontend
+        "https://www.agentchain.trade",  # Production frontend with www
+        "https://app.agentchain.trade",  # Alternative subdomain
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
