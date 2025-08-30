@@ -39,6 +39,17 @@ const ThesisCard: React.FC<ThesisCardProps> = ({ thesis }) => {
     return 'NEUTRAL'
   }
 
+  // Handle case where thesis might be undefined or missing required properties
+  if (!thesis || typeof thesis.p_up_60m !== 'number') {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="body1" color="textSecondary">
+          No trading thesis data available
+        </Typography>
+      </Box>
+    )
+  }
+
   return (
     <Box>
       {/* Header */}

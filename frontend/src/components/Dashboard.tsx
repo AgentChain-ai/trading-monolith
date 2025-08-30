@@ -44,6 +44,20 @@ const Dashboard: React.FC<DashboardProps> = ({ token, data, onRefresh }) => {
     return <TrendingFlat color="warning" />
   }
 
+  // Handle case where current_thesis might be undefined
+  if (!current_thesis || typeof current_thesis.p_up_60m !== 'number') {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="h6" color="textSecondary" gutterBottom>
+          No trading data available for {token}
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          Try refreshing or ingesting token data first.
+        </Typography>
+      </Box>
+    )
+  }
+
   return (
     <Box>
       {/* Summary Cards */}
