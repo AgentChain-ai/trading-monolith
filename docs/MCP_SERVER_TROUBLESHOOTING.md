@@ -7,22 +7,22 @@ This guide helps diagnose and resolve issues with the Search-Scrape MCP Server i
 ### Check System Status
 ```bash
 # Check circuit breaker status
-curl http://localhost:8000/admin/circuit-breakers
+curl https://api.agentchain.trade/admin/circuit-breakers
 
 # Test MCP connection
-curl http://localhost:8000/admin/test-mcp
+curl https://api.agentchain.trade/admin/test-mcp
 
 # Get service health
-curl http://localhost:8000/admin/service-health
+curl https://api.agentchain.trade/admin/service-health
 ```
 
 ### Reset Circuit Breakers
 ```bash
 # Reset all circuit breakers
-curl -X POST http://localhost:8000/admin/circuit-breakers/reset-all
+curl -X POST https://api.agentchain.trade/admin/circuit-breakers/reset-all
 
 # Reset specific circuit breaker
-curl -X POST http://localhost:8000/admin/circuit-breakers/mcp_scrape/reset
+curl -X POST https://api.agentchain.trade/admin/circuit-breakers/mcp_scrape/reset
 ```
 
 ## Common Issues and Solutions
@@ -42,7 +42,7 @@ curl -X POST http://localhost:8000/admin/circuit-breakers/mcp_scrape/reset
 **Solutions:**
 1. **Immediate Fix:** Reset circuit breaker manually
    ```bash
-   curl -X POST http://localhost:8000/admin/circuit-breakers/reset-all
+   curl -X POST https://api.agentchain.trade/admin/circuit-breakers/reset-all
    ```
 
 2. **Root Cause Analysis:** Check MCP server status
@@ -251,16 +251,16 @@ RetryConfig(
 1. **Immediate Response:**
    ```bash
    # Reset all circuit breakers
-   curl -X POST http://localhost:8000/admin/circuit-breakers/reset-all
+   curl -X POST https://api.agentchain.trade/admin/circuit-breakers/reset-all
    
    # Clear cache to force fresh attempts
-   curl -X POST http://localhost:8000/admin/cache/clear
+   curl -X POST https://api.agentchain.trade/admin/cache/clear
    ```
 
 2. **Verify Cache Coverage:**
    ```bash
    # Check what's available in cache
-   curl http://localhost:8000/admin/cache-status
+   curl https://api.agentchain.trade/admin/cache-status
    ```
 
 3. **Enable Cache-Only Mode** (if implemented):
@@ -271,21 +271,21 @@ RetryConfig(
 
 1. **Check Circuit Breaker Status:**
    ```bash
-   curl http://localhost:8000/admin/circuit-breakers
+   curl https://api.agentchain.trade/admin/circuit-breakers
    ```
 
 2. **Reset Specific Service:**
    ```bash
    # If only scrape is failing
-   curl -X POST http://localhost:8000/admin/circuit-breakers/mcp_scrape/reset
+   curl -X POST https://api.agentchain.trade/admin/circuit-breakers/mcp_scrape/reset
    
    # If only search is failing  
-   curl -X POST http://localhost:8000/admin/circuit-breakers/mcp_search/reset
+   curl -X POST https://api.agentchain.trade/admin/circuit-breakers/mcp_search/reset
    ```
 
 3. **Test Individual Operations:**
    ```bash
-   curl http://localhost:8000/admin/test-mcp
+   curl https://api.agentchain.trade/admin/test-mcp
    ```
 
 ## Best Practices

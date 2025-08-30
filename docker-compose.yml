@@ -24,7 +24,7 @@ services:
     networks:
       - agentchain-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      test: ["CMD", "curl", "-f", "https://api.agentchain.trade/api/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -37,7 +37,7 @@ services:
     ports:
       - "3000:80"
     environment:
-      - REACT_APP_API_URL=http://localhost:8000/api/v1
+      - REACT_APP_API_URL=https://api.agentchain.trade/api/v1
       - REACT_APP_MICROSERVICE_URL=http://localhost:3002
     depends_on:
       - backend

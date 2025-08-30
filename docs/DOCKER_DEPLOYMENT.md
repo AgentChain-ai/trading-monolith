@@ -68,7 +68,7 @@ docker compose -f docker-compose.prod.yml up -d
 | Service | Development | Production | Description |
 |---------|------------|------------|-------------|
 | **Frontend** | http://localhost:3000 | http://localhost | React UI with Material-UI |
-| **Backend API** | http://localhost:8000 | http://localhost/api | FastAPI with AI engine |
+| **Backend API** | https://api.agentchain.trade | http://localhost/api | FastAPI with AI engine |
 | **Microservice** | http://localhost:3002 | http://localhost/microservice | Gasless transactions |
 | **Prometheus** | http://localhost:9090 | http://localhost:9090 | Metrics collection |
 | **Grafana** | http://localhost:3001 | http://localhost:3001 | Monitoring dashboards |

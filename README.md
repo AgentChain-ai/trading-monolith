@@ -89,9 +89,9 @@ mkdir -p ../data
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-The FastAPI server will start at `http://localhost:8000`
-- API Documentation: `http://localhost:8000/docs`
-- Health Check: `http://localhost:8000/health`
+The FastAPI server will start at `https://api.agentchain.trade`
+- API Documentation: `https://api.agentchain.trade/docs`
+- Health Check: `https://api.agentchain.trade/health`
 
 ### Frontend Setup
 
@@ -216,29 +216,29 @@ velocity = (NHS_t - NHS_{t-1}) / max(|NHS_{t-1}|, 1)
 
 **POST /api/v1/ingest**
 ```bash
-curl -X POST "http://localhost:8000/api/v1/ingest" \
+curl -X POST "https://api.agentchain.trade/api/v1/ingest" \
   -H "Content-Type: application/json" \
   -d '{"token": "USDC", "hours_back": 24, "max_articles": 20}'
 ```
 
 **GET /api/v1/thesis/{token}**
 ```bash
-curl "http://localhost:8000/api/v1/thesis/USDC?window_minutes=60"
+curl "https://api.agentchain.trade/api/v1/thesis/USDC?window_minutes=60"
 ```
 
 **GET /api/v1/predict/{token}** 
 ```bash
-curl "http://localhost:8000/api/v1/predict/USDC?horizon_minutes=60"
+curl "https://api.agentchain.trade/api/v1/predict/USDC?horizon_minutes=60"
 ```
 
 **GET /api/v1/dashboard/{token}**
 ```bash  
-curl "http://localhost:8000/api/v1/dashboard/USDC?hours_back=48"
+curl "https://api.agentchain.trade/api/v1/dashboard/USDC?hours_back=48"
 ```
 
 **POST /api/v1/feedback**
 ```bash
-curl -X POST "http://localhost:8000/api/v1/feedback" \
+curl -X POST "https://api.agentchain.trade/api/v1/feedback" \
   -H "Content-Type: application/json" \
   -d '{"token": "USDC", "bucket_ts": "2025-08-27T11:30:00Z", "actual_return": 0.025}'
 ```
@@ -247,7 +247,7 @@ curl -X POST "http://localhost:8000/api/v1/feedback" \
 
 **POST /api/v1/train**
 ```bash
-curl -X POST "http://localhost:8000/api/v1/train?model_type=lightgbm"
+curl -X POST "https://api.agentchain.trade/api/v1/train?model_type=lightgbm"
 ```
 
 ## 📈 Dashboard Features
@@ -388,7 +388,7 @@ This software is for educational and research purposes only. Trading cryptocurre
 ## 📞 Support
 
 - **Issues**: [GitHub Issues](https://github.com/your-org/ntm-trading-engine/issues)
-- **Documentation**: [API Docs](http://localhost:8000/docs)
+- **Documentation**: [API Docs](https://api.agentchain.trade/docs)
 - **Email**: support@ntm-trading-engine.com
 
 ---

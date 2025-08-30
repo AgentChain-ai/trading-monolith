@@ -99,7 +99,7 @@ services:
       - ntm-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "https://api.agentchain.trade/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -237,7 +237,7 @@ EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
+  CMD curl -f https://api.agentchain.trade/health || exit 1
 
 # Run application
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120", "--keep-alive", "2", "--max-requests", "1000", "--max-requests-jitter", "50", "app.main:app"]
@@ -733,7 +733,7 @@ export MALLOC_MMAP_MAX_=65536
 #### 2. Circuit Breaker Trips
 ```bash
 # Check circuit breaker status
-curl http://localhost:8000/api/v1/health
+curl https://api.agentchain.trade/api/v1/health
 
 # Reset circuit breaker (manual intervention)
 # Restart affected service or wait for timeout

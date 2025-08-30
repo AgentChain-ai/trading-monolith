@@ -59,12 +59,12 @@ After making changes, test the deposit address generation:
 
 ```bash
 # Test Fuji (should work after reconfiguration)
-curl -X POST "http://localhost:8000/api/v1/deposit/address" \
+curl -X POST "https://api.agentchain.trade/api/v1/deposit/address" \
   -H "Content-Type: application/json" \
   -d '{"user_wallet_address": "0x1234567890123456789012345678901234567890", "chain_id": 43113}'
 
 # Test Mainnet (should work with current config)
-curl -X POST "http://localhost:8000/api/v1/deposit/address" \
+curl -X POST "https://api.agentchain.trade/api/v1/deposit/address" \
   -H "Content-Type: application/json" \
   -d '{"user_wallet_address": "0x1234567890123456789012345678901234567890", "chain_id": 43114}'
 ```
