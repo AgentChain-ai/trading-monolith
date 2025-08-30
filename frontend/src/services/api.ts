@@ -1,7 +1,9 @@
 import axios from 'axios'
 import { DashboardData, TradingThesis, PredictionResponse, IngestRequest, FeedbackRequest } from '../types'
 
-const API_BASE_URL = '/api/v1'
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? '/api/v1'  // In production, use relative path (nginx proxy)
+  : 'https://api.agentchain.trade/api/v1'  // In development, call backend directly
 
 // Create axios instance with default config
 const api = axios.create({
