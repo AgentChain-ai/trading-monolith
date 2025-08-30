@@ -40,19 +40,19 @@ chmod 755 ./data ./logs
 
 # Pull latest images
 echo "📥 Pulling latest base images..."
-docker-compose -f docker-compose.prod.yml pull redis prometheus grafana
+docker compose -f docker-compose.prod.yml pull redis prometheus grafana
 
 # Build production images
 echo "🔨 Building production images..."
-docker-compose -f docker-compose.prod.yml build --no-cache
+docker compose -f docker-compose.prod.yml build --no-cache
 
 # Stop existing containers
 echo "🛑 Stopping existing containers..."
-docker-compose -f docker-compose.prod.yml down --remove-orphans
+docker compose -f docker-compose.prod.yml down --remove-orphans
 
 # Start production services
 echo "🚀 Starting production services..."
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 
 # Wait for services
 echo "⏳ Waiting for services to start..."
@@ -64,7 +64,7 @@ services=("backend" "frontend" "microservice" "redis")
 all_healthy=true
 
 for service in "${services[@]}"; do
-    if docker-compose -f docker-compose.prod.yml ps $service | grep -q "healthy\|Up"; then
+    if docker compose -f docker-compose.prod.yml ps $service | grep -q "healthy\|Up"; then
         echo "✅ $service is healthy"
     else
         echo "❌ $service is not healthy"
@@ -80,12 +80,12 @@ if [ "$all_healthy" = true ]; then
     echo "📊 Monitoring:   http://localhost:9090 (Prometheus)"
     echo "📈 Dashboards:   http://localhost:3001 (Grafana)"
     echo ""
-    echo "📝 Monitor logs: docker-compose -f docker-compose.prod.yml logs -f"
+    echo "📝 Monitor logs: docker compose -f docker-compose.prod.yml logs -f"
     echo "🔄 Update:       ./deploy-prod.sh"
-    echo "🛑 Stop:         docker-compose -f docker-compose.prod.yml down"
+    echo "🛑 Stop:         docker compose -f docker-compose.prod.yml down"
 else
     echo ""
     echo "❌ Deployment failed. Check service logs:"
-    echo "docker-compose -f docker-compose.prod.yml logs"
+    echo "docker compose -f docker-compose.prod.yml logs"
     exit 1
 fi

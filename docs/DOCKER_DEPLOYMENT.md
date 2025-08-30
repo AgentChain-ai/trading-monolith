@@ -50,7 +50,7 @@ nano .env
 ./deploy-dev.sh
 
 # Or manually:
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 3. Production Deployment
@@ -60,7 +60,7 @@ docker-compose up -d
 ./deploy-prod.sh
 
 # Or manually:
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 ## 📊 Service Endpoints
@@ -144,8 +144,8 @@ All services include health check endpoints:
 
 ```bash
 # Check service health
-docker-compose ps
-docker-compose logs [service-name]
+docker compose ps
+docker compose logs [service-name]
 ```
 
 ### Metrics Collection
@@ -158,9 +158,9 @@ docker-compose logs [service-name]
 
 ```bash
 # View logs
-docker-compose logs -f backend
-docker-compose logs -f frontend
-docker-compose logs -f microservice
+docker compose logs -f backend
+docker compose logs -f frontend
+docker compose logs -f microservice
 
 # Log rotation configured for production
 ```
@@ -171,47 +171,47 @@ docker-compose logs -f microservice
 
 ```bash
 # Development
-docker-compose up -d
+docker compose up -d
 
 # Production
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 
 # Specific service
-docker-compose up -d backend
+docker compose up -d backend
 ```
 
 ### Stopping Services
 
 ```bash
 # Stop all
-docker-compose down
+docker compose down
 
 # Stop and remove volumes
-docker-compose down -v
+docker compose down -v
 
 # Stop specific service
-docker-compose stop backend
+docker compose stop backend
 ```
 
 ### Updating Services
 
 ```bash
 # Rebuild and restart
-docker-compose build --no-cache
-docker-compose up -d
+docker compose build --no-cache
+docker compose up -d
 
 # Rolling update
-docker-compose up -d --no-deps backend
+docker compose up -d --no-deps backend
 ```
 
 ### Scaling Services
 
 ```bash
 # Scale horizontally
-docker-compose up -d --scale backend=3
+docker compose up -d --scale backend=3
 
 # Production scaling with load balancer
-docker-compose -f docker-compose.prod.yml up -d --scale backend=2
+docker compose -f docker-compose.prod.yml up -d --scale backend=2
 ```
 
 ## 🛠️ Troubleshooting
@@ -221,13 +221,13 @@ docker-compose -f docker-compose.prod.yml up -d --scale backend=2
 **Service won't start:**
 ```bash
 # Check logs
-docker-compose logs service-name
+docker compose logs service-name
 
 # Check health
-docker-compose ps
+docker compose ps
 
 # Restart service
-docker-compose restart service-name
+docker compose restart service-name
 ```
 
 **Out of memory:**
@@ -248,8 +248,8 @@ deploy:
 docker network ls
 
 # Recreate network
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 ```
 
 ### Performance Tuning

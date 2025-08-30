@@ -26,9 +26,9 @@ mkdir -p ./data
 
 # Build and start services
 echo "🔨 Building and starting services..."
-docker-compose down --remove-orphans
-docker-compose build --no-cache
-docker-compose up -d
+docker compose down --remove-orphans
+docker compose build --no-cache
+docker compose up -d
 
 # Wait for services to be healthy
 echo "⏳ Waiting for services to be healthy..."
@@ -38,11 +38,11 @@ sleep 10
 echo "🔍 Checking service health..."
 services=("backend" "frontend" "microservice" "redis")
 for service in "${services[@]}"; do
-    if docker-compose ps $service | grep -q "healthy\|Up"; then
+    if docker compose ps $service | grep -q "healthy\|Up"; then
         echo "✅ $service is running"
     else
         echo "❌ $service failed to start"
-        docker-compose logs $service
+        docker compose logs $service
     fi
 done
 
@@ -55,6 +55,6 @@ echo "⚡ Microservice: http://localhost:3002"
 echo "📈 Prometheus:   http://localhost:9090"
 echo "📊 Grafana:      http://localhost:3001 (admin/admin)"
 echo ""
-echo "📝 View logs:    docker-compose logs -f [service-name]"
-echo "🛑 Stop all:     docker-compose down"
+echo "📝 View logs:    docker compose logs -f [service-name]"
+echo "🛑 Stop all:     docker compose down"
 echo ""
