@@ -386,3 +386,4 @@ secrets/
 .local/
 .cache/
 .tmp/
+.kilocode/
