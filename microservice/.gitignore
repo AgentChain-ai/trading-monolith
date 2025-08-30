@@ -1,0 +1,6 @@
+dist
+node_modules
+logs
+.env
+PRODUCTION_GUIDE.md
+test-microservice.sh
