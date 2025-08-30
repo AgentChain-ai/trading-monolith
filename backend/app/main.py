@@ -1,10 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import logging
-from datetime import datetime, timedelta
-from typing import Optional, List
+import os
+from datetime import datetime
 from dotenv import load_dotenv
 
 from .database import engine
@@ -68,18 +67,28 @@ app = FastAPI(
 # Setup monitoring middleware
 app = setup_monitoring(app)
 
-# Configure CORS
+# Configure CORS with environment variable support
+allowed_origins = [
+    "http://localhost:3000", 
+    "http://localhost:5173",  # React dev servers
+    "https://agentchain.trade",  # Production frontend
+    "https://www.agentchain.trade",  # Production frontend with www
+    "https://app.agentchain.trade",  # Alternative subdomain
+]
+
+# Add custom origins from environment variable
+custom_origins = os.getenv('CORS_ORIGINS', '').split(',')
+for origin in custom_origins:
+    if origin.strip():
+        allowed_origins.append(origin.strip())
+
+logger.info(f"CORS allowed origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000", 
-        "http://localhost:5173",  # React dev servers
-        "https://agentchain.trade",  # Production frontend
-        "https://www.agentchain.trade",  # Production frontend with www
-        "https://app.agentchain.trade",  # Alternative subdomain
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
