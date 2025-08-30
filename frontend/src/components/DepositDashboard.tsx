@@ -15,16 +15,11 @@ import {
   Stepper,
   Step,
   StepLabel,
-  StepContent,
   Chip,
   Avatar,
-  LinearProgress,
   CircularProgress,
   Alert,
   IconButton,
-  Dialog,
-  DialogContent,
-  DialogTitle,
   Fade,
   Grow,
   Slide,
@@ -33,12 +28,9 @@ import {
   AccountBalanceWallet,
   ContentCopy,
   CheckCircle,
-  Warning,
   QrCode2,
   Send,
-  TrendingUp,
   Security,
-  Speed,
 } from '@mui/icons-material'
 import { apiClient } from '../services/api'
 import { Chain, ManagedWallet, DepositAddress, UserBalance, DepositHealth } from '../types'
@@ -200,13 +192,13 @@ const DepositDashboard: React.FC = () => {
     setCurrentStep('monitoring')
   }
 
-  const openInWallet = () => {
-    if (!depositAddress || !depositAmount) return
+  // const openInWallet = () => {
+  //   if (!depositAddress || !depositAmount) return
 
-    // MetaMask deep link
-    const metamaskUrl = `https://metamask.app.link/send/${depositAddress.smart_account}?value=${parseEther(depositAmount)}`
-    window.open(metamaskUrl, '_blank')
-  }
+  //   // MetaMask deep link
+  //   const metamaskUrl = `https://metamask.app.link/send/${depositAddress.smart_account}?value=${parseEther(depositAmount)}`
+  //   window.open(metamaskUrl, '_blank')
+  // }
 
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState('')

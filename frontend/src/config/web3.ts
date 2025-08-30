@@ -18,7 +18,14 @@ export const supportedChains = [
 ] as const
 
 // Chain configuration with RPC endpoints
-export const chainConfig = {
+export const chainConfig: Record<number, {
+  name: string
+  symbol: string
+  decimals: number
+  rpcUrl: string
+  blockExplorer: string
+  color: string
+}> = {
   [mainnet.id]: {
     name: 'Ethereum',
     symbol: 'ETH',

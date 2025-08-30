@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   Card,
-  CardContent,
   Typography,
   Box,
   Chip,
@@ -15,8 +14,6 @@ import {
 import {
   CheckCircle,
   Warning,
-  Error,
-  Info,
 } from '@mui/icons-material'
 import { ThesisCardProps } from '../types'
 

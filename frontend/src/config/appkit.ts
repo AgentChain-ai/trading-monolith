@@ -53,7 +53,14 @@ export const modal = createAppKit({
 export const config = wagmiAdapter.wagmiConfig
 
 // Chain configuration helper
-export const chainConfig = {
+export const chainConfig: Record<number, {
+  name: string
+  symbol: string
+  decimals: number
+  rpcUrl: string
+  blockExplorer: string
+  color: string
+}> = {
   [mainnet.id]: {
     name: 'Ethereum',
     symbol: 'ETH',
