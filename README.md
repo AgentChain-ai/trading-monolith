@@ -339,7 +339,7 @@ MODEL_DRAFT=llama-3.1-70b-versatile
 
 # Optional
 DATABASE_URL=sqlite:///data/ntm_trading.db
-MCP_SERVER_URL=http://3.110.206.240:5001
+MCP_SERVER_URL=https://scraper.agentchain.trade/
 BUCKET_WINDOW_MINUTES=10
 ```
 
