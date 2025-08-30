@@ -1,0 +1,224 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "NTM Trading Engine Dashboard",
+    "tags": ["ntm", "trading", "ai"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(ntm_requests_total[5m])",
+            "legendFormat": "{{method}} {{endpoint}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Response Time (95th percentile)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(ntm_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(ntm_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "(rate(ntm_requests_total{status_code=~\"5..\"}[5m]) / rate(ntm_requests_total[5m])) * 100",
+            "legendFormat": "5xx Error Rate %",
+            "refId": "A"
+          },
+          {
+            "expr": "(rate(ntm_requests_total{status_code=~\"4..\"}[5m]) / rate(ntm_requests_total[5m])) * 100",
+            "legendFormat": "4xx Error Rate %",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Circuit Breaker Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "ntm_circuit_breaker_state",
+            "legendFormat": "{{service}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"options": {"0": {"text": "CLOSED", "color": "green"}}, "type": "value"},
+              {"options": {"1": {"text": "HALF-OPEN", "color": "yellow"}}, "type": "value"},
+              {"options": {"2": {"text": "OPEN", "color": "red"}}, "type": "value"}
+            ]
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "External API Calls",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(ntm_external_api_calls_total{status=\"success\"}[5m])",
+            "legendFormat": "{{service}} Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(ntm_external_api_calls_total{status=\"failure\"}[5m])",
+            "legendFormat": "{{service}} Failure",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Calls/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Articles Processing Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(ntm_articles_processed_total{status=\"success\"}[5m])",
+            "legendFormat": "{{token}} Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(ntm_articles_processed_total{status=\"failure\"}[5m])",
+            "legendFormat": "{{token}} Failure",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Articles/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "Narrative Heat by Token",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "ntm_narrative_heat_current",
+            "legendFormat": "{{token}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Heat Score",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 8,
+        "title": "Predictions Made",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(ntm_predictions_made_total[5m])",
+            "legendFormat": "{{token}} {{model_type}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Predictions/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      },
+      {
+        "id": 9,
+        "title": "System Resources",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "ntm_system_resources{resource_type=\"cpu_percent\"}",
+            "legendFormat": "CPU %",
+            "refId": "A"
+          },
+          {
+            "expr": "ntm_system_resources{resource_type=\"memory_percent\"}",
+            "legendFormat": "Memory %",
+            "refId": "B"
+          },
+          {
+            "expr": "ntm_system_resources{resource_type=\"disk_percent\"}",
+            "legendFormat": "Disk %",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Percentage",
+            "min": 0,
+            "max": 100
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "5s",
+    "schemaVersion": 27,
+    "version": 1,
+    "gnetId": null
+  }
+}
