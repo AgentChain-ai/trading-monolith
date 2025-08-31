@@ -19,6 +19,8 @@ The platform implements a sophisticated Narrative→Thesis Model (NTM) that tran
 - **Aggregates** signals into Narrative Heat, Risk Polarity, and Consensus metrics
 - **Predicts** price movement probabilities using LightGBM/Logistic Regression models
 - **Composes** complete trading theses with reasoning and risk guardrails
+- **Executes** automated portfolio rebalancing based on ML predictions (Phase 3.1)
+- **Tracks** performance with real-time portfolio monitoring and trade history
 - **Learns** continuously from market outcomes through feedback loops
 
 ## 🏗️ Architecture
@@ -210,6 +212,29 @@ velocity = (NHS_t - NHS_{t-1}) / max(|NHS_{t-1}|, 1)
 }
 ```
 
+### 6. Portfolio Management & Automated Trading (Phase 3.1 ✅)
+
+**Portfolio Rebalancing Engine:**
+- **Frequency**: Every 5 minutes via automated scheduler
+- **Strategy**: ML-driven allocation based on prediction scores
+- **Risk Controls**: 30% max single-token allocation, $10 minimum trades
+- **Safety Features**: Comprehensive error handling and trade simulation
+
+**Portfolio Allocation Formula:**
+```python
+token_weight = prediction_score / sum(all_prediction_scores)
+target_amount = total_portfolio_value * token_weight
+rebalance_threshold = 5%  # Trigger rebalancing if deviation > 5%
+```
+
+**Key Features:**
+- Real-time portfolio tracking across multiple chains
+- Automated rebalancing based on ML predictions
+- Performance analytics and trade history
+- User-controlled auto-trading preferences
+- Background scheduler with health monitoring
+```
+
 ## 🔌 API Reference
 
 ### Core Endpoints
@@ -261,10 +286,25 @@ curl -X POST "https://api.agentchain.trade/api/v1/train?model_type=lightgbm"
 5. **Feature Importance** - Bar chart of prediction drivers
 6. **Evidence Articles** - List of supporting source materials
 
+### 💰 Deposit & Wallet System
+- **Multi-chain Support** - Ethereum, BSC, Polygon, Arbitrum, Optimism, Base, Avalanche, Fantom
+- **Gasless Transactions** - Powered by 0xgasless infrastructure
+- **Managed Wallets** - Secure deposit addresses generated per user per chain
+- **Real-time Balance Tracking** - Live portfolio value monitoring
+
+### 📊 Portfolio Management (Phase 3.1 ✅)
+- **Automated Rebalancing** - AI-driven portfolio optimization every 5 minutes
+- **ML-Powered Allocation** - Smart token weighting based on prediction scores
+- **Performance Analytics** - Real-time portfolio tracking and trade history
+- **Risk Management** - 30% max single-token allocation, $10 minimum trades
+- **Auto-Trading Controls** - Enable/disable automated trading per user
+- **Trade Simulation** - Safe testing environment before live execution
+
 ### Real-time Updates
 - Auto-refresh every 30 seconds
 - WebSocket connections for live data
 - Background ingestion with progress tracking
+- Automated trading scheduler monitoring
 
 ## 🛡️ Quality Controls & Guardrails
 

@@ -44,6 +44,12 @@ The **Narrative→Thesis Model (NTM) Trading Engine** is an AI-powered trading s
 - **Wallet Integration**: Multi-chain wallet connection via Reown AppKit (Ethereum, BSC, Polygon, Fantom, Arbitrum, Optimism, Base, Avalanche)
 - **Deposit System**: Complete deposit flow with modern Material-UI interface, multi-chain support, and 0xgasless integration
 - **Admin Token Management**: Full CRUD API for token management with auto-analysis scheduling
+- **Portfolio Management (Phase 3.1)**: 
+  - Comprehensive portfolio tracking and analytics
+  - ML-driven automated rebalancing every 5 minutes
+  - Real-time performance monitoring and trade history
+  - Portfolio management UI with auto-trading controls
+  - Background scheduler for automated trading decisions
 
 ### ⚠️ **Current Limitations:**
 - **MCP Server Issues**: Scraping timeouts causing data ingestion failures
@@ -51,10 +57,11 @@ The **Narrative→Thesis Model (NTM) Trading Engine** is an AI-powered trading s
 - **Chain Configuration**: Microservice currently configured for Avalanche mainnet only (Fuji testnet requires reconfiguration)
 
 ### ❌ **Missing Components:**
-- Automated trading execution
-- Portfolio management and rebalancing
-- Advanced trading strategies
-- Performance analytics and reporting
+- Live trade execution with 0xgasless integration (simulated in Phase 3.1)
+- Advanced trading strategies beyond rebalancing
+- Real-time market data streaming
+- Performance analytics dashboard
+- Advanced risk management and circuit breakers
 
 ## 🎯 Development Roadmap
 
@@ -419,10 +426,10 @@ UserBalances: Aggregated balances per user/token/chain
 ---
 
 ### **Phase 3: Automated Trading System** 🤖
-**Status**: PLANNED
+**Status**: ✅ PHASE 3.1 COMPLETED - Portfolio Management & Automated Rebalancing
 **Priority**: MEDIUM
 
-#### 3.1 Portfolio Rebalancing Engine
+#### 3.1 Portfolio Rebalancing Engine ✅ COMPLETED
 **Logic**: Every 5 minutes, rebalance portfolio to top 10 tokens based on prediction scores
 
 **Portfolio Allocation Formula**:
@@ -431,23 +438,48 @@ token_weight = prediction_score / sum(all_prediction_scores)
 target_amount = total_portfolio_value * token_weight
 ```
 
-**Implementation Tasks:**
-- [ ] Create portfolio tracking service
-- [ ] Implement prediction score ranking system
-- [ ] Build rebalancing algorithm with slippage protection
-- [ ] Add transaction execution with gas optimization
-- [ ] Implement risk management rules
+**✅ Implementation Completed:**
+- [x] **Portfolio Service**: Created `PortfolioService` with comprehensive portfolio tracking and management
+- [x] **ML Integration**: Prediction score ranking system using existing MLEngine
+- [x] **Rebalancing Algorithm**: Smart allocation with 30% max single-token limit and $10 minimum trades
+- [x] **Trading Scheduler**: Automated 5-minute rebalancing with `TradingScheduler` service
+- [x] **Risk Management**: Built-in guardrails and position limits
+- [x] **API Endpoints**: Complete REST API for portfolio management:
+  - `GET /portfolio/status/{user_address}` - Portfolio overview
+  - `POST /portfolio/rebalance` - Manual rebalancing trigger
+  - `GET /portfolio/predictions/{user_address}` - ML predictions for portfolio tokens
+  - `GET /portfolio/performance/{user_address}` - Performance metrics
+  - `POST /portfolio/auto-trade/toggle` - Enable/disable auto-trading
+  - `GET /portfolio/trades/{user_address}` - Trade history
+  - `GET /scheduler/status` - Scheduler monitoring
+- [x] **Frontend Portfolio Tab**: Complete React UI with real-time portfolio tracking, auto-trading controls, and trade history
+- [x] **Background Processing**: Automated scheduler runs as background task in FastAPI lifespan
 
-#### 3.2 Trading Decision Engine
+**Files Created/Modified:**
+- `backend/app/services/portfolio_service.py` - Core portfolio management logic (300+ lines)
+- `backend/app/services/scheduler_service.py` - Automated trading scheduler (200+ lines)  
+- `backend/app/api/routes.py` - Portfolio API endpoints (150+ lines added)
+- `backend/app/main.py` - Scheduler integration in app startup
+- `frontend/src/components/PortfolioTab.tsx` - Portfolio management UI (400+ lines)
+- `frontend/src/services/api.ts` - Portfolio API client methods
+- `frontend/src/App.tsx` - Portfolio tab integration
+
+#### 3.2 Trading Decision Engine ✅ PARTIALLY COMPLETED
 **Frequency**: 5-minute intervals
 **Strategy**: Dynamic rebalancing based on ML predictions
 
-**Implementation Tasks:**
-- [ ] Create scheduled task runner
-- [ ] Implement portfolio analysis service
-- [ ] Add trade execution logic with safety checks
-- [ ] Create trading history and performance tracking
-- [ ] Add emergency stop mechanisms
+**✅ Implementation Completed:**
+- [x] **Scheduled Task Runner**: `TradingScheduler` with configurable intervals
+- [x] **Portfolio Analysis Service**: Integrated ML predictions for rebalancing decisions
+- [x] **Trade Logic Framework**: Rebalancing trades with safety checks (simulated execution)
+- [x] **Performance Tracking**: Portfolio performance metrics and trade history
+- [x] **Monitoring**: Scheduler status endpoints and health checks
+
+**🔄 Remaining Tasks:**
+- [ ] **Live Trade Execution**: Integrate with 0xgasless microservice for actual trades
+- [ ] **Advanced Strategies**: Implement momentum, mean reversion, and volatility strategies  
+- [ ] **Emergency Stop**: Circuit breakers for market volatility
+- [ ] **Gas Optimization**: Dynamic gas pricing and transaction batching
 
 ---
 

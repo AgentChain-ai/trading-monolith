@@ -14,6 +14,7 @@ from .services.feature_extractor import FeatureExtractor
 from .services.ml_engine import MLEngine
 from .services.thesis_composer import ThesisComposer
 from .services.gecko_client import GeckoTerminalClient
+from .services.scheduler_service import start_trading_scheduler, stop_trading_scheduler
 from .api.routes import router
 from .utils.monitoring import setup_monitoring, metrics_collector, performance_monitor
 
@@ -51,11 +52,27 @@ async def lifespan(app: FastAPI):
     app.state.thesis_composer = ThesisComposer()
     app.state.gecko_client = GeckoTerminalClient()
     
+    # Start automated trading scheduler
+    import asyncio
+    logger.info("Starting automated trading scheduler...")
+    try:
+        # Start scheduler as background task
+        asyncio.create_task(start_trading_scheduler())
+        logger.info("Automated trading scheduler started successfully")
+    except Exception as e:
+        logger.warning(f"Failed to start trading scheduler: {e}")
+        logger.info("Trading scheduler can be started manually via /api/v1/scheduler/start")
+    
     logger.info("NTM Engine initialized successfully")
     yield
     
     # Shutdown
     logger.info("Shutting down NTM Engine...")
+    try:
+        await stop_trading_scheduler()
+        logger.info("Trading scheduler stopped")
+    except Exception as e:
+        logger.warning(f"Error stopping trading scheduler: {e}")
 
 app = FastAPI(
     title="Narrative→Thesis Model (NTM) Trading Engine",

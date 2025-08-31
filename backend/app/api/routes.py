@@ -16,6 +16,8 @@ from ..services.thesis_composer import ThesisComposer
 from ..services.aggregator import NarrativeAggregator
 from ..services.gecko_client import GeckoTerminalClient
 from ..services.deposit_service import DepositService
+from ..services.portfolio_service import PortfolioService
+from ..services.scheduler_service import get_trading_scheduler
 from pydantic import BaseModel
 from ..utils.resilience import _circuit_breakers, health_checker, fallback_cache
 
@@ -36,6 +38,16 @@ class FeedbackRequest(BaseModel):
     token: str
     bucket_ts: str
     actual_return: float
+
+class PortfolioRequest(BaseModel):
+    user_address: str
+    
+class RebalanceRequest(BaseModel):
+    user_address: str
+    force: bool = False
+
+# Initialize services
+portfolio_service = PortfolioService()
 
 class PredictResponse(BaseModel):
     token: str
@@ -2220,3 +2232,265 @@ async def deposit_system_health():
             "error": str(e),
             "timestamp": datetime.utcnow().isoformat()
         }
+
+# Portfolio Management Endpoints
+
+@router.get("/portfolio/status/{user_address}")
+async def get_portfolio_status(user_address: str, db: Session = Depends(get_db)):
+    """Get current portfolio status for a user"""
+    try:
+        # Get portfolio tracking info
+        portfolio = await portfolio_service.get_portfolio(user_address, db)
+        
+        if not portfolio:
+            return {
+                "user_address": user_address,
+                "status": "no_portfolio",
+                "total_value_usd": 0,
+                "positions": [],
+                "last_rebalance": None,
+                "performance": {
+                    "total_return": 0,
+                    "daily_return": 0,
+                    "trades_count": 0
+                }
+            }
+        
+        return {
+            "user_address": user_address,
+            "status": "active",
+            "total_value_usd": portfolio.get("total_value_usd", 0),
+            "positions": portfolio.get("positions", []),
+            "last_rebalance": portfolio.get("last_rebalance"),
+            "performance": portfolio.get("performance", {}),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get portfolio status: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get portfolio status: {str(e)}")
+
+@router.post("/portfolio/rebalance")
+async def trigger_portfolio_rebalance(request: RebalanceRequest, db: Session = Depends(get_db)):
+    """Trigger portfolio rebalancing for a user"""
+    try:
+        # Get current portfolio
+        portfolio = await portfolio_service.get_portfolio(request.user_address, db)
+        if not portfolio:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+        
+        # Generate rebalancing trades
+        trades = await portfolio_service.generate_rebalancing_trades(request.user_address, db)
+        
+        if not trades:
+            return {
+                "status": "no_rebalance_needed",
+                "message": "Portfolio is already optimally allocated",
+                "trades": [],
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        
+        # Execute trades (in production this would integrate with 0xgasless)
+        execution_results = []
+        for trade in trades:
+            # For now, simulate trade execution
+            result = {
+                "token": trade["token"],
+                "action": trade["action"],
+                "amount": trade["amount"],
+                "expected_usd": trade["expected_usd"],
+                "status": "simulated",  # In production: "executed" or "failed"
+                "tx_hash": f"0x{trade['token'][:8]}...simulated"
+            }
+            execution_results.append(result)
+        
+        # Record rebalance
+        await portfolio_service.record_rebalance(request.user_address, trades, db)
+        
+        return {
+            "status": "rebalanced",
+            "trades_executed": len(execution_results),
+            "trades": execution_results,
+            "total_value_moved": sum(t["expected_usd"] for t in trades),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to rebalance portfolio: {e}")
+        raise HTTPException(status_code=500, detail=f"Rebalancing failed: {str(e)}")
+
+@router.get("/portfolio/predictions/{user_address}")
+async def get_portfolio_predictions(user_address: str, db: Session = Depends(get_db)):
+    """Get ML predictions for user's portfolio tokens"""
+    try:
+        # Get user's current positions
+        portfolio = await portfolio_service.get_portfolio(user_address, db)
+        if not portfolio:
+            raise HTTPException(status_code=404, detail="Portfolio not found")
+        
+        # Get predictions for each token in portfolio
+        predictions = {}
+        for position in portfolio.get("positions", []):
+            token = position["token"]
+            try:
+                prediction = await portfolio_service.get_token_prediction(token, db)
+                predictions[token] = {
+                    "current_position": position,
+                    "prediction": prediction,
+                    "recommendation": "hold"  # Default recommendation
+                }
+                
+                # Simple recommendation logic
+                if prediction and prediction.get("prediction_score", 0) > 0.7:
+                    predictions[token]["recommendation"] = "increase"
+                elif prediction and prediction.get("prediction_score", 0) < 0.3:
+                    predictions[token]["recommendation"] = "decrease"
+                    
+            except Exception as e:
+                logger.warning(f"Failed to get prediction for {token}: {e}")
+                predictions[token] = {
+                    "current_position": position,
+                    "prediction": None,
+                    "recommendation": "hold",
+                    "error": str(e)
+                }
+        
+        return {
+            "user_address": user_address,
+            "predictions": predictions,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get portfolio predictions: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get predictions: {str(e)}")
+
+@router.get("/portfolio/performance/{user_address}")
+async def get_portfolio_performance(user_address: str, days: int = 30, db: Session = Depends(get_db)):
+    """Get portfolio performance metrics over time"""
+    try:
+        performance = await portfolio_service.get_performance_metrics(user_address, days, db)
+        
+        return {
+            "user_address": user_address,
+            "period_days": days,
+            "performance": performance,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get portfolio performance: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get performance: {str(e)}")
+
+@router.post("/portfolio/auto-trade/toggle")
+async def toggle_auto_trading(request: PortfolioRequest, enable: bool = True, db: Session = Depends(get_db)):
+    """Enable or disable automatic trading for a user"""
+    try:
+        # Update user's auto-trading preference
+        result = await portfolio_service.set_auto_trading(request.user_address, enable, db)
+        
+        return {
+            "user_address": request.user_address,
+            "auto_trading_enabled": enable,
+            "status": "updated" if result else "failed",
+            "message": f"Auto-trading {'enabled' if enable else 'disabled'} for user",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to toggle auto-trading: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update auto-trading: {str(e)}")
+
+@router.get("/portfolio/trades/{user_address}")
+async def get_trade_history(user_address: str, limit: int = 50, db: Session = Depends(get_db)):
+    """Get trade history for a user"""
+    try:
+        trades = await portfolio_service.get_trade_history(user_address, limit, db)
+        
+        return {
+            "user_address": user_address,
+            "trades": trades,
+            "total_trades": len(trades),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get trade history: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get trade history: {str(e)}")
+
+@router.get("/portfolio/analytics")
+async def get_portfolio_analytics(db: Session = Depends(get_db)):
+    """Get system-wide portfolio analytics"""
+    try:
+        analytics = await portfolio_service.get_system_analytics(db)
+        
+        return {
+            "analytics": analytics,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get portfolio analytics: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get analytics: {str(e)}")
+
+# Automated Trading Scheduler Endpoints
+
+@router.get("/scheduler/status")
+async def get_scheduler_status():
+    """Get automated trading scheduler status"""
+    try:
+        scheduler = get_trading_scheduler()
+        status = await scheduler.get_scheduler_status()
+        
+        return {
+            "scheduler": status,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get scheduler status: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get scheduler status: {str(e)}")
+
+@router.post("/scheduler/start")
+async def start_scheduler():
+    """Start the automated trading scheduler"""
+    try:
+        scheduler = get_trading_scheduler()
+        
+        if scheduler.is_running:
+            return {
+                "status": "already_running",
+                "message": "Scheduler is already running",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        
+        # Start scheduler in background task
+        import asyncio
+        asyncio.create_task(scheduler.start_scheduler())
+        
+        return {
+            "status": "started",
+            "message": "Automated trading scheduler started",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to start scheduler: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to start scheduler: {str(e)}")
+
+@router.post("/scheduler/stop")
+async def stop_scheduler():
+    """Stop the automated trading scheduler"""
+    try:
+        scheduler = get_trading_scheduler()
+        await scheduler.stop_scheduler()
+        
+        return {
+            "status": "stopped",
+            "message": "Automated trading scheduler stopped",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to stop scheduler: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to stop scheduler: {str(e)}")

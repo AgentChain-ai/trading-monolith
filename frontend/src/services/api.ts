@@ -143,6 +143,63 @@ export const apiClient = {
   async initializeManagedWallets() {
     const response = await api.post('/deposit/initialize')
     return response.data
+  },
+
+  // Portfolio Management APIs
+  async getPortfolioStatus(userAddress: string) {
+    const response = await api.get(`/portfolio/status/${userAddress}`)
+    return response.data
+  },
+
+  async rebalancePortfolio(userAddress: string, force: boolean = false) {
+    const response = await api.post('/portfolio/rebalance', {
+      user_address: userAddress,
+      force: force
+    })
+    return response.data
+  },
+
+  async getPortfolioPredictions(userAddress: string) {
+    const response = await api.get(`/portfolio/predictions/${userAddress}`)
+    return response.data
+  },
+
+  async getPortfolioPerformance(userAddress: string, days: number = 30) {
+    const response = await api.get(`/portfolio/performance/${userAddress}?days=${days}`)
+    return response.data
+  },
+
+  async toggleAutoTrading(userAddress: string, enabled: boolean) {
+    const response = await api.post(`/portfolio/auto-trade/toggle?enable=${enabled}`, {
+      user_address: userAddress
+    })
+    return response.data
+  },
+
+  async getTradeHistory(userAddress: string, limit: number = 50) {
+    const response = await api.get(`/portfolio/trades/${userAddress}?limit=${limit}`)
+    return response.data
+  },
+
+  async getPortfolioAnalytics() {
+    const response = await api.get('/portfolio/analytics')
+    return response.data
+  },
+
+  // Scheduler APIs
+  async getSchedulerStatus() {
+    const response = await api.get('/scheduler/status')
+    return response.data
+  },
+
+  async startScheduler() {
+    const response = await api.post('/scheduler/start')
+    return response.data
+  },
+
+  async stopScheduler() {
+    const response = await api.post('/scheduler/stop')
+    return response.data
   }
 }
 
