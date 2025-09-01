@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { DashboardData, TradingThesis, PredictionResponse, IngestRequest, FeedbackRequest } from '../types'
 
-const API_BASE_URL = 'http://localhost:8000/api/v1'//'https://api.agentchain.trade/api/v1'  // In development, call backend directly
+const API_BASE_URL = 'https://api.agentchain.trade/api/v1'  // In development, call backend directly
 
 // Create axios instance with default config
 const api = axios.create({
