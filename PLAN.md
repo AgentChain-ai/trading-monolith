@@ -50,6 +50,11 @@ The **Narrative→Thesis Model (NTM) Trading Engine** is an AI-powered trading s
   - Real-time performance monitoring and trade history
   - Portfolio management UI with auto-trading controls
   - Background scheduler for automated trading decisions
+- **Waitlist System (Phase 4.1)**: 
+  - 📋 PLANNED - Community building and token airdrop system
+  - User registration with email and wallet address collection
+  - Early access management for advanced AI features
+  - Token distribution eligibility tracking
 
 ### ⚠️ **Current Limitations:**
 - **MCP Server Issues**: Scraping timeouts causing data ingestion failures
@@ -429,6 +434,58 @@ UserBalances: Aggregated balances per user/token/chain
 **Status**: ✅ PHASE 3.1 COMPLETED - Portfolio Management & Automated Rebalancing
 **Priority**: MEDIUM
 
+### **Phase 4: Waitlist & Community Building** 📧
+**Status**: 📋 PLANNED
+**Priority**: HIGH
+
+#### 4.1 Waitlist Landing Page
+**Purpose**: Capture user interest and build community before full launch
+**Features**: Email collection, wallet address registration, token airdrop eligibility
+
+**Implementation Tasks:**
+- [ ] **Landing Page Design**: Create compelling waitlist page with AgentChain.Trade branding
+- [ ] **User Registration Form**: 
+  - Email address input with validation
+  - Wallet address input with ENS support
+  - Optional: Twitter/Discord handles for social engagement
+  - Terms acceptance and privacy policy
+- [ ] **Live Registration Counter**: 
+  - Real-time display of total waitlist registrations
+  - Social proof to encourage more signups
+  - Animated counter with milestone celebrations
+  - Optional: Recent registration activity feed
+- [ ] **Database Schema**: Create waitlist_users table with registration tracking
+- [ ] **Email Integration**: 
+  - Welcome email sequence
+  - Airdrop notifications
+  - Early access invitations
+  - Platform updates and announcements
+- [ ] **Airdrop System**: 
+  - Token allocation tracking
+  - Eligibility verification
+  - Distribution mechanism
+- [ ] **Early Access Management**: 
+  - Phased rollout system
+  - Priority access based on registration date
+  - Beta testing program coordination
+- [ ] **Analytics & Tracking**: 
+  - Registration metrics
+  - Conversion funnel analysis
+  - User engagement tracking
+
+**Value Proposition:**
+- 🎁 **Token Airdrops**: Exclusive access to AgentChain token distribution
+- 🚀 **Early Access**: Priority access to advanced AI Trading Thesis Engine
+- 📊 **Beta Features**: First access to new trading strategies and analytics
+- 🤝 **Community**: Join the AgentChain.Trade founding community
+
+**Technical Implementation:**
+- Frontend: React landing page with form validation
+- Backend: FastAPI endpoints for registration and management
+- Database: PostgreSQL/SQLite for user data storage
+- Email: SendGrid/Mailchimp integration for email campaigns
+- Wallet Integration: Web3 validation for wallet addresses
+
 #### 3.1 Portfolio Rebalancing Engine ✅ COMPLETED
 **Logic**: Every 5 minutes, rebalance portfolio to top 10 tokens based on prediction scores
 
@@ -537,6 +594,26 @@ CREATE TABLE trade_executions (
     tx_hash VARCHAR(66),
     chain_id INTEGER,
     executed_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### `waitlist_users` (Phase 4.1)
+```sql
+CREATE TABLE waitlist_users (
+    id INTEGER PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    wallet_address VARCHAR(42),
+    twitter_handle VARCHAR(50),
+    discord_handle VARCHAR(50),
+    registration_date TIMESTAMP DEFAULT NOW(),
+    email_verified BOOLEAN DEFAULT FALSE,
+    airdrop_eligible BOOLEAN DEFAULT TRUE,
+    airdrop_amount DECIMAL(18,8),
+    early_access_granted BOOLEAN DEFAULT FALSE,
+    referral_code VARCHAR(20),
+    referred_by INTEGER REFERENCES waitlist_users(id),
+    notification_preferences JSON, -- {"email": true, "airdrop": true, "updates": true}
+    user_metadata JSON -- Additional tracking data (renamed from 'metadata' to avoid SQLAlchemy conflict)
 );
 ```
 
@@ -726,17 +803,18 @@ def update_ingestion_status(token: str, status: str, message: str, progress: int
 ## 🎯 Next Steps Priority Queue
 
 ### **Immediate (Current Session)**
-1. **✅ COMPLETED: Streamlined UX Flow** - Single-step token analysis with real-time progress
-2. **🔄 IN PROGRESS: Testing & Debugging** - Validate the new flow works end-to-end
-3. **📋 NEXT: Update Plan Documentation** - Record all changes and learnings
+1. **✅ COMPLETED: Phase 3.1 Portfolio Management** - Automated trading system with ML-driven rebalancing
+2. **🔄 IN PROGRESS: Testing & Validation** - Validate portfolio management and trading features
+3. **📋 NEXT: Phase 4.1 Waitlist System** - Community building and token airdrop preparation
 
 ### **Short Term (Next Session)**
-1. **Fix MCP Server Issues**: Investigate and resolve scraping timeouts
-   - Test endpoints directly with curl
-   - Implement fallback data for development
-   - Add request throttling
-2. **Admin Token API**: Basic CRUD operations for token management
-3. **Model Persistence**: Save/load trained models to disk
+1. **🚀 HIGH PRIORITY: Waitlist Landing Page**: Capture early users and build community
+   - Design compelling landing page with value proposition
+   - Implement email and wallet address collection
+   - Set up email automation for welcome sequence
+   - Create airdrop eligibility tracking system
+2. **Fix Remaining Issues**: Address any portfolio management bugs
+3. **Live Trade Execution**: Integrate portfolio rebalancing with 0xgasless microservice
 
 ### **Medium Term (Week 2-3)**
 1. **Wallet Integration**: User authentication and chain selection
@@ -929,11 +1007,12 @@ def update_ingestion_status(token: str, status: str, message: str, progress: int
 - **Testing Coverage**: API endpoint testing and user flow validation
 
 ### **Next Phase Priority:**
-- **Phase 3**: Automated Trading System - Portfolio rebalancing and trade execution
+- **Phase 4.1**: Waitlist & Community Building - Email collection, token airdrop system, early access management
+- **Phase 3.2**: Live Trading Integration - Connect portfolio rebalancing to 0xgasless execution
 
 ---
 
 This document serves as the single source of truth for the NTM Trading Engine project. All team members should reference and update this file as development progresses.
 
-**Last Updated**: August 31, 2025 - Phase 2 Complete (Multi-Chain Wallet Integration & Deposit System)
-**Next Review**: September 7, 2025
+**Last Updated**: September 1, 2025 - Phase 3.1 Complete (Automated Portfolio Management) + Phase 4.1 Planned (Waitlist & Community Building)
+**Next Review**: September 8, 2025

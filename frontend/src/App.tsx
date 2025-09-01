@@ -21,6 +21,7 @@ import toast from 'react-hot-toast'
 import Dashboard from './components/Dashboard'
 import DepositDashboard from './components/DepositDashboard'
 import PortfolioTab from './components/PortfolioTab'
+import WaitlistTab from './components/WaitlistTab'
 import WalletButton from './components/WalletButton'
 import ChainSwitcher from './components/ChainSwitcher'
 import { apiClient } from './services/api'
@@ -33,7 +34,7 @@ function App() {
   const [tokenInput, setTokenInput] = useState('')
   const [analysisState, setAnalysisState] = useState<AnalysisState>('idle')
   const [progressMessage, setProgressMessage] = useState('')
-  const [activeTab, setActiveTab] = useState(0) // 0 = Trading, 1 = Portfolio, 2 = Deposits
+  const [activeTab, setActiveTab] = useState(0) // 0 = Trading, 1 = Portfolio, 2 = Waitlist, 3 = Deposits
   const queryClient = useQueryClient()
 
   // Query for dashboard data with smarter refetching
@@ -381,8 +382,9 @@ function App() {
             }}
           >
             <Tab label="🏠 Trading Dashboard" />
-            <Tab label="� Portfolio" />
-            <Tab label="�💰 Deposit System" />
+            <Tab label="📊 Portfolio" />
+            <Tab label="🎁 Join Waitlist" />
+            <Tab label="💰 Deposit System" />
           </Tabs>
         </Box>
 
@@ -558,6 +560,9 @@ function App() {
         ) : activeTab === 1 ? (
           /* Portfolio Tab */
           <PortfolioTab />
+        ) : activeTab === 2 ? (
+          /* Waitlist Tab */
+          <WaitlistTab />
         ) : (
           /* Deposit Dashboard Tab */
           <DepositDashboard />

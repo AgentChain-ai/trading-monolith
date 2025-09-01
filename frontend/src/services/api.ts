@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { DashboardData, TradingThesis, PredictionResponse, IngestRequest, FeedbackRequest } from '../types'
 
-const API_BASE_URL = 'https://api.agentchain.trade/api/v1'  // In development, call backend directly
+const API_BASE_URL = 'http://localhost:8000/api/v1'//'https://api.agentchain.trade/api/v1'  // In development, call backend directly
 
 // Create axios instance with default config
 const api = axios.create({
@@ -199,6 +199,38 @@ export const apiClient = {
 
   async stopScheduler() {
     const response = await api.post('/scheduler/stop')
+    return response.data
+  },
+
+  // Waitlist APIs
+  async registerForWaitlist(data: {
+    email: string
+    wallet_address?: string
+    twitter_handle?: string
+    discord_handle?: string
+    referral_code?: string
+  }) {
+    const response = await api.post('/waitlist/register', data)
+    return response.data
+  },
+
+  async getWaitlistStats() {
+    const response = await api.get('/waitlist/stats')
+    return response.data
+  },
+
+  async getRecentRegistrations(limit: number = 10) {
+    const response = await api.get(`/waitlist/recent?limit=${limit}`)
+    return response.data
+  },
+
+  async getUserWaitlistInfo(email: string) {
+    const response = await api.get(`/waitlist/user/${encodeURIComponent(email)}`)
+    return response.data
+  },
+
+  async getReferralInfo(referralCode: string) {
+    const response = await api.get(`/waitlist/referral/${referralCode}`)
     return response.data
   }
 }

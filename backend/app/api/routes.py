@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
@@ -18,6 +18,7 @@ from ..services.gecko_client import GeckoTerminalClient
 from ..services.deposit_service import DepositService
 from ..services.portfolio_service import PortfolioService
 from ..services.scheduler_service import get_trading_scheduler
+from ..services.waitlist_service import WaitlistService
 from pydantic import BaseModel
 from ..utils.resilience import _circuit_breakers, health_checker, fallback_cache
 
@@ -46,8 +47,16 @@ class RebalanceRequest(BaseModel):
     user_address: str
     force: bool = False
 
+class WaitlistRegistration(BaseModel):
+    email: str
+    wallet_address: Optional[str] = None
+    twitter_handle: Optional[str] = None
+    discord_handle: Optional[str] = None
+    referral_code: Optional[str] = None
+
 # Initialize services
 portfolio_service = PortfolioService()
+waitlist_service = WaitlistService()
 
 class PredictResponse(BaseModel):
     token: str
@@ -2494,3 +2503,137 @@ async def stop_scheduler():
     except Exception as e:
         logger.error(f"Failed to stop scheduler: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to stop scheduler: {str(e)}")
+
+# Waitlist Management Endpoints
+
+@router.post("/waitlist/register")
+async def register_for_waitlist(registration: WaitlistRegistration, request: Request, db: Session = Depends(get_db)):
+    """Register a new user for the AgentChain.Trade waitlist"""
+    try:
+        # Get client info for analytics
+        ip_address = request.client.host if request.client else None
+        user_agent = request.headers.get("user-agent")
+        
+        # Register user
+        result = await waitlist_service.register_user(
+            email=registration.email,
+            wallet_address=registration.wallet_address,
+            twitter_handle=registration.twitter_handle,
+            discord_handle=registration.discord_handle,
+            referral_code=registration.referral_code,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            db=db
+        )
+        
+        if result["success"]:
+            return {
+                "success": True,
+                "message": f"Successfully registered! You're #{result['position']} on the waitlist.",
+                "data": {
+                    "position": result["position"],
+                    "airdrop_amount": result["airdrop_amount"],
+                    "referral_code": result["referral_code"],
+                    "referrer_bonus": result.get("referrer_bonus", 0)
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        else:
+            raise HTTPException(status_code=400, detail=result["error"])
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to register user: {e}")
+        raise HTTPException(status_code=500, detail="Registration failed. Please try again.")
+
+@router.get("/waitlist/stats")
+async def get_waitlist_stats(db: Session = Depends(get_db)):
+    """Get current waitlist statistics and counter"""
+    try:
+        stats = await waitlist_service.get_waitlist_stats(db)
+        
+        return {
+            "success": True,
+            "stats": stats,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get waitlist stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get waitlist statistics")
+
+@router.get("/waitlist/recent")
+async def get_recent_registrations(limit: int = 10, db: Session = Depends(get_db)):
+    """Get recent registrations for social proof (anonymized)"""
+    try:
+        if limit > 50:  # Prevent excessive queries
+            limit = 50
+            
+        recent = await waitlist_service.get_recent_registrations(limit, db)
+        
+        return {
+            "success": True,
+            "recent_registrations": recent,
+            "count": len(recent),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get recent registrations: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get recent registrations")
+
+@router.get("/waitlist/user/{email}")
+async def get_user_info(email: str, db: Session = Depends(get_db)):
+    """Get waitlist user information by email"""
+    try:
+        user = await waitlist_service.get_user_by_email(email, db)
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found in waitlist")
+        
+        # Don't expose sensitive information
+        return {
+            "success": True,
+            "user": {
+                "email": user.email,
+                "registration_date": user.registration_date.isoformat() if user.registration_date else None,
+                "airdrop_amount": float(user.airdrop_amount) if user.airdrop_amount else 0,
+                "referral_code": user.referral_code,
+                "email_verified": user.email_verified,
+                "early_access_granted": user.early_access_granted
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get user info: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get user information")
+
+@router.get("/waitlist/referral/{referral_code}")
+async def get_referral_info(referral_code: str, db: Session = Depends(get_db)):
+    """Get referral code information"""
+    try:
+        user = await waitlist_service.get_user_by_referral_code(referral_code, db)
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="Invalid referral code")
+        
+        return {
+            "success": True,
+            "referral_info": {
+                "code": user.referral_code,
+                "user_email_domain": user.email.split('@')[1] if '@' in user.email else 'unknown',
+                "registration_date": user.registration_date.isoformat() if user.registration_date else None,
+                "bonus_amount": waitlist_service.referral_bonus
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get referral info: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get referral information")

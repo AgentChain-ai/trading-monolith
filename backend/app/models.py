@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, Float, JSON, Boolean, UniqueConstraint, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, DateTime, Text, Float, JSON, Boolean, UniqueConstraint, ForeignKey, DECIMAL
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 from .database import Base
 from datetime import datetime
@@ -355,3 +355,50 @@ class UserBalance(Base):
             "last_updated": self.last_updated.isoformat() if self.last_updated else None,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
+
+class WaitlistUser(Base):
+    """
+    Waitlist registration for AgentChain.Trade community and token airdrops
+    """
+    __tablename__ = "waitlist_users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    wallet_address = Column(String(42), nullable=True, index=True)
+    twitter_handle = Column(String(50), nullable=True)
+    discord_handle = Column(String(50), nullable=True)
+    registration_date = Column(DateTime, default=func.now(), nullable=False)
+    email_verified = Column(Boolean, default=False)
+    airdrop_eligible = Column(Boolean, default=True)
+    airdrop_amount = Column(DECIMAL(precision=18, scale=8), nullable=True)
+    early_access_granted = Column(Boolean, default=False)
+    referral_code = Column(String(20), nullable=True, unique=True, index=True)
+    referred_by = Column(Integer, ForeignKey("waitlist_users.id"), nullable=True)
+    notification_preferences = Column(JSON, default=lambda: {"email": True, "airdrop": True, "updates": True})
+    user_metadata = Column(JSON, default=dict)  # Renamed from 'metadata' to avoid SQLAlchemy conflict
+    ip_address = Column(String(45), nullable=True)  # For analytics and fraud prevention
+    user_agent = Column(Text, nullable=True)
+    
+    # Relationships
+    referrals = relationship("WaitlistUser", backref=backref("referrer", remote_side=[id]))
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "email": self.email,
+            "wallet_address": self.wallet_address,
+            "twitter_handle": self.twitter_handle,
+            "discord_handle": self.discord_handle,
+            "registration_date": self.registration_date.isoformat() if self.registration_date else None,
+            "email_verified": self.email_verified,
+            "airdrop_eligible": self.airdrop_eligible,
+            "airdrop_amount": str(self.airdrop_amount) if self.airdrop_amount else None,
+            "early_access_granted": self.early_access_granted,
+            "referral_code": self.referral_code,
+            "referred_by": self.referred_by,
+            "notification_preferences": self.notification_preferences,
+            "user_metadata": self.user_metadata
+        }
+    
+    def __repr__(self):
+        return f"<WaitlistUser(email='{self.email}', registered='{self.registration_date}')>"
