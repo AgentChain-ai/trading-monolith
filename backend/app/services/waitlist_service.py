@@ -34,9 +34,8 @@ class WaitlistService:
         """Generate sample recent registrations for analytics preview"""
         import random
         
-        # Sample email domains for preview analytics
-        domains = ['gmail.com', 'protonmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 
-                  'tutanota.com', 'pm.me', 'hey.com', 'fastmail.com']
+        # Sample email domains for preview analytics (mostly Gmail with occasional ProtonMail)
+        domains = ['gmail.com'] * 8 + ['protonmail.com'] * 2  # 80% Gmail, 20% ProtonMail
         
         sample_users = []
         now = datetime.utcnow()

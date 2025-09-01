@@ -290,7 +290,7 @@ const WaitlistTab: React.FC<WaitlistTabProps> = ({ isActive = true }) => {
               </Typography>
               {stats?.stats?.recent_registrations_24h > 0 && (
                 <Typography variant="body2" sx={{ opacity: 0.9, mt: 1 }}>
-                  +{stats.stats.recent_registrations_24h} joined today
+                  {/* +{stats.stats.recent_registrations_24h} joined today */}
                 </Typography>
               )}
             </Paper>
